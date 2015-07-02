@@ -465,7 +465,7 @@
      * @return {Object} object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      var o = extend(this.callSuper('toObject', propertiesToInclude), {
+      var o = extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         path: this.path.map(function(item) { return item.slice() }),
         pathOffset: this.pathOffset
       });

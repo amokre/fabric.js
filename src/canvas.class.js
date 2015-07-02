@@ -668,7 +668,8 @@
      * @see http://www.w3.org/TR/css3-ui/#cursor
      */
     setCursor: function (value) {
-      this.upperCanvasEl.style.cursor = value;
+	  // (atWar) We handle cursor changes ourselves
+      //this.upperCanvasEl.style.cursor = value;
     },
 
     /**

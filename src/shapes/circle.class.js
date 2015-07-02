@@ -55,7 +55,7 @@
     initialize: function(options) {
       options = options || { };
 
-      this.callSuper('initialize', options);
+      this.constructor.superclass.prototype.initialize.apply(this, [options]);
       this.set('radius', options.radius || 0);
 
       this.startAngle = options.startAngle || this.startAngle;
@@ -69,7 +69,7 @@
      * @return {fabric.Circle} thisArg
      */
     _set: function(key, value) {
-      this.callSuper('_set', key, value);
+      this.constructor.superclass.prototype._set.apply(this, [key, value]);
 
       if (key === 'radius') {
         this.setRadius(value);
@@ -84,7 +84,7 @@
      * @return {Object} object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      return extend(this.callSuper('toObject', propertiesToInclude), {
+      return extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         radius: this.get('radius'),
         startAngle: this.startAngle,
         endAngle: this.endAngle

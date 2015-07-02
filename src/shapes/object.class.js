@@ -302,7 +302,7 @@
      * @type String
      * @default
      */
-    originX:                  'left',
+    originX:                  'center', // (atWar) Fix for: [BACK_INCOMPAT] Change default objects' originX/originY to left/top (commit 330784ac2c7297cd34c2c7fbe6ea69c8079b9e85)
 
     /**
      * Vertical origin of transformation of an object (one of "top", "bottom", "center")
@@ -310,7 +310,7 @@
      * @type String
      * @default
      */
-    originY:                  'top',
+    originY:                  'center', // (atWar) Fix for: [BACK_INCOMPAT] Change default objects' originX/originY to left/top (commit 330784ac2c7297cd34c2c7fbe6ea69c8079b9e85)
 
     /**
      * Top position of an object. Note that by default it's relative to object center. You can change this by setting originY={top/center/bottom}
@@ -449,7 +449,7 @@
      * @type String
      * @default
      */
-    fill:                     'rgb(0,0,0)',
+    fill:                     null, // (atWar) Speed up rendering (rgb(0,0,0) by default, which is the same thing)
 
     /**
      * Fill rule used to fill an object
@@ -756,11 +756,17 @@
       }
       var center = fromLeft ? this._getLeftTopCoords() : this.getCenterPoint();
       ctx.translate(center.x, center.y);
-      ctx.rotate(degreesToRadians(this.angle));
-      ctx.scale(
-        this.scaleX * (this.flipX ? -1 : 1),
-        this.scaleY * (this.flipY ? -1 : 1)
-      );
+	  // (atWar) Only rotate if angle is different from 0
+	  if (this.angle != 0) {
+		ctx.rotate(degreesToRadians(this.angle));
+	  }
+	  // (atWar) Only scale if scaleX or scaleY different from 1
+	  if (this.scaleX != 1 || this.scaleY != 1) {
+		  ctx.scale(
+			this.scaleX * (this.flipX ? -1 : 1),
+			this.scaleY * (this.flipY ? -1 : 1)
+		  );
+	  }
     },
 
     /**
@@ -991,10 +997,13 @@
      * @param {CanvasRenderingContext2D} ctx Context to render on
      */
     _setOpacity: function(ctx) {
-      if (this.group) {
-        this.group._setOpacity(ctx);
-      }
-      ctx.globalAlpha *= this.opacity;
+		// (atWar) Only set opacity if different from 1
+		if (this.opacity != 1) {
+		  if (this.group) {
+			this.group._setOpacity(ctx);
+		  }
+		  ctx.globalAlpha *= this.opacity;
+		}
     },
 
     _setStrokeStyles: function(ctx) {
@@ -1023,27 +1032,7 @@
      * @param {Boolean} [noTransform] When true, context is not transformed
      */
     _renderControls: function(ctx, noTransform) {
-      if (!this.active || noTransform) {
-        return;
-      }
-      var vpt = this.getViewportTransform();
-      ctx.save();
-      var center;
-      if (this.group) {
-        center = fabric.util.transformPoint(this.group.getCenterPoint(), vpt);
-        ctx.translate(center.x, center.y);
-        ctx.rotate(degreesToRadians(this.group.angle));
-      }
-      center = fabric.util.transformPoint(this.getCenterPoint(), vpt, null != this.group);
-      if (this.group) {
-        center.x *= this.group.scaleX;
-        center.y *= this.group.scaleY;
-      }
-      ctx.translate(center.x, center.y);
-      ctx.rotate(degreesToRadians(this.angle));
-      this.drawBorders(ctx);
-      this.drawControls(ctx);
-      ctx.restore();
+      // (atWar) This is not needed (only slows things down)
     },
 
     /**

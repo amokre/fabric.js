@@ -64,7 +64,7 @@
     initialize: function(options) {
       options = options || { };
 
-      this.callSuper('initialize', options);
+      this.constructor.superclass.prototype.initialize.apply(this, [options]);
       this._initRxRy();
 
     },
@@ -149,7 +149,7 @@
      * @return {Object} object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      var object = extend(this.callSuper('toObject', propertiesToInclude), {
+      var object = extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         rx: this.get('rx') || 0,
         ry: this.get('ry') || 0
       });

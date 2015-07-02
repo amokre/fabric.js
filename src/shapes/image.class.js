@@ -90,7 +90,7 @@
       options || (options = { });
       this.filters = [ ];
       this.resizeFilters = [ ];
-      this.callSuper('initialize', options);
+      this.constructor.superclass.prototype.initialize.apply(this, [options]);
       this._initElement(element, options);
     },
 
@@ -192,7 +192,7 @@
      * @return {Object} Object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      var object = extend(this.callSuper('toObject', propertiesToInclude), {
+      var object = extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         src: this._originalElement.src || this._originalElement._src,
         filters: this.filters.map(function(filterObj) {
           return filterObj && filterObj.toObject();

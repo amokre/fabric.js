@@ -182,7 +182,7 @@
      */
     initialize: function(text, options) {
       this.styles = options ? (options.styles || { }) : { };
-      this.callSuper('initialize', text, options);
+      this.constructor.superclass.prototype.initialize.apply(this, [text, options]);
       this.initBehavior();
     },
 
@@ -190,7 +190,7 @@
      * @private
      */
     _clearCache: function() {
-      this.callSuper('_clearCache');
+      this.constructor.superclass.prototype._clearCache.apply(this);
       this.__maxFontHeights = [ ];
       this.__widthOfSpace = [ ];
     },
@@ -307,7 +307,7 @@
      * @param {CanvasRenderingContext2D} ctx Context to render on
      */
     _render: function(ctx) {
-      this.callSuper('_render', ctx);
+      this.constructor.superclass.prototype._render.apply(this, [ctx]);
       this.ctx = ctx;
       this.isEditing && this.renderCursorOrSelection();
     },
@@ -625,10 +625,10 @@
       this.skipTextAlign = false;
 
       if (method === 'fillText' && this.fill) {
-        this.callSuper('_renderChars', method, ctx, line, left, top);
+        this.constructor.superclass.prototype._renderChars.apply(this, [method, ctx, line, left, top]);
       }
       if (method === 'strokeText' && ((this.stroke && this.strokeWidth > 0) || this.skipFillStrokeCheck)) {
-        this.callSuper('_renderChars', method, ctx, line, left, top);
+        this.constructor.superclass.prototype._renderChars.apply(this, [method, ctx, line, left, top]);
       }
     },
 
@@ -752,7 +752,7 @@
       if (!this.isEmptyStyles()) {
         top += this.fontSize * (this._fontSizeFraction + 0.03);
       }
-      this.callSuper('_renderTextLine', method, ctx, line, left, top, lineIndex);
+      this.constructor.superclass.prototype._renderTextLine.apply(this, [method, ctx, line, left, top, lineIndex]);
     },
 
     /**
@@ -761,7 +761,7 @@
      */
     _renderTextDecoration: function(ctx) {
       if (this.isEmptyStyles()) {
-        return this.callSuper('_renderTextDecoration', ctx);
+        return this.constructor.superclass.prototype._renderTextDecoration.apply(this, [ctx]);
       }
     },
 
@@ -1098,7 +1098,7 @@
      * @return {Object} object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      return fabric.util.object.extend(this.callSuper('toObject', propertiesToInclude), {
+      return fabric.util.object.extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         styles: clone(this.styles)
       });
     }

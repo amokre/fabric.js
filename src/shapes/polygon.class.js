@@ -58,7 +58,7 @@
     initialize: function(points, options) {
       options = options || { };
       this.points = points || [ ];
-      this.callSuper('initialize', options);
+      this.constructor.superclass.prototype.initialize.apply(this, [options]);
       this._calcDimensions();
       if (!('top' in options)) {
         this.top = this.minY;
@@ -104,7 +104,7 @@
      * @return {Object} Object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      return extend(this.callSuper('toObject', propertiesToInclude), {
+      return extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         points: this.points.concat()
       });
     },

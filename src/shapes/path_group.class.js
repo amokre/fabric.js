@@ -133,7 +133,7 @@
         }
       }
 
-      return this.callSuper('_set', prop, value);
+      return this.constructor.superclass.prototype._set.apply(this, [prop, value]);
     },
 
     /**

@@ -49,7 +49,7 @@
     initialize: function(options) {
       options = options || { };
 
-      this.callSuper('initialize', options);
+      this.constructor.superclass.prototype.initialize.apply(this, [options]);
 
       this.set('rx', options.rx || 0);
       this.set('ry', options.ry || 0);
@@ -62,7 +62,7 @@
      * @return {fabric.Ellipse} thisArg
      */
     _set: function(key, value) {
-      this.callSuper('_set', key, value);
+      this.constructor.superclass.prototype._set.apply(this, [key, value]);
       switch (key) {
 
         case 'rx':
@@ -101,7 +101,7 @@
      * @return {Object} object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      return extend(this.callSuper('toObject', propertiesToInclude), {
+      return extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         rx: this.get('rx'),
         ry: this.get('ry')
       });

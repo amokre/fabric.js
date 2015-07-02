@@ -63,7 +63,7 @@
       // we cannot change properties of objects.
       // Thus we need to set options to group without objects,
       // because delegatedProperties propagate to objects.
-      isAlreadyGrouped && this.callSuper('initialize', options);
+      isAlreadyGrouped && this.constructor.superclass.prototype.initialize.apply(this, [options]);
 
       this._objects = objects || [];
       for (var i = this._objects.length; i--; ) {
@@ -87,7 +87,7 @@
       else {
         this._calcBounds();
         this._updateObjectsCoords();
-        this.callSuper('initialize', options);
+        this.constructor.superclass.prototype.initialize.apply(this, [options]);
       }
 
       this.setCoords();
@@ -230,7 +230,7 @@
           this._objects[i].set(key, value);
         }
       }
-      this.callSuper('_set', key, value);
+      this.constructor.superclass.prototype._set.apply(this, [key, value]);
     },
 
     /**
@@ -239,7 +239,7 @@
      * @return {Object} object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      return extend(this.callSuper('toObject', propertiesToInclude), {
+      return extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         objects: invoke(this._objects, 'toObject', propertiesToInclude)
       });
     },
@@ -276,10 +276,7 @@
      * @param {Boolean} [noTransform] When true, context is not transformed
      */
     _renderControls: function(ctx, noTransform) {
-      this.callSuper('_renderControls', ctx, noTransform);
-      for (var i = 0, len = this._objects.length; i < len; i++) {
-        this._objects[i]._renderControls(ctx);
-      }
+      // (atWar) This is not needed (only slows things down)
     },
 
     /**

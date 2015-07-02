@@ -38,7 +38,7 @@ fabric.PatternBrush = fabric.util.createClass(fabric.PencilBrush, /** @lends fab
    * Sets brush styles
    */
   _setBrushStyles: function() {
-    this.callSuper('_setBrushStyles');
+    this.constructor.superclass.prototype._setBrushStyles.apply(this);
     this.canvas.contextTop.strokeStyle = this.getPattern();
   },
 
@@ -46,7 +46,7 @@ fabric.PatternBrush = fabric.util.createClass(fabric.PencilBrush, /** @lends fab
    * Creates path
    */
   createPath: function(pathData) {
-    var path = this.callSuper('createPath', pathData);
+    var path = this.constructor.superclass.prototype.createPath.apply(this, [pathData]);
     path.stroke = new fabric.Pattern({
       source: this.source || this.getPatternSrcFunction()
     });

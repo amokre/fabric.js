@@ -68,7 +68,7 @@
         points = [0, 0, 0, 0];
       }
 
-      this.callSuper('initialize', options);
+      this.constructor.superclass.prototype.initialize.apply(this, [options]);
 
       this.set('x1', points[0]);
       this.set('y1', points[1]);
@@ -103,7 +103,7 @@
      * @param {Any} value
      */
     _set: function(key, value) {
-      this.callSuper('_set', key, value);
+      this.constructor.superclass.prototype._set.apply(this, [key, value]);
       if (typeof coordProps[key] !== 'undefined') {
         this._setWidthHeight();
       }
@@ -202,7 +202,7 @@
      * @return {Object} object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      return extend(this.callSuper('toObject', propertiesToInclude), this.calcLinePoints());
+      return extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), this.calcLinePoints());
     },
 
     /**

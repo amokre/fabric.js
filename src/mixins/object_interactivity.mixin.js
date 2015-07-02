@@ -75,35 +75,7 @@
      * @private
      */
     _setCornerCoords: function() {
-      var coords = this.oCoords,
-          newTheta = degreesToRadians(45 - this.angle),
-          cornerHypotenuse = Math.sqrt(2 * Math.pow(this.cornerSize, 2)) / 2,
-          cosHalfOffset = cornerHypotenuse * Math.cos(newTheta),
-          sinHalfOffset = cornerHypotenuse * Math.sin(newTheta),
-          x, y;
-
-      for (var point in coords) {
-        x = coords[point].x;
-        y = coords[point].y;
-        coords[point].corner = {
-          tl: {
-            x: x - sinHalfOffset,
-            y: y - cosHalfOffset
-          },
-          tr: {
-            x: x + cosHalfOffset,
-            y: y - sinHalfOffset
-          },
-          bl: {
-            x: x - cosHalfOffset,
-            y: y + sinHalfOffset
-          },
-          br: {
-            x: x + sinHalfOffset,
-            y: y + cosHalfOffset
-          }
-        };
-      }
+      // (atWar) This is not needed (only slows things down)
     },
 
     /*

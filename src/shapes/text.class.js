@@ -804,7 +804,7 @@
      * @return {Object} Object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-      var object = extend(this.callSuper('toObject', propertiesToInclude), {
+      var object = extend(this.constructor.superclass.prototype.toObject.apply(this, [propertiesToInclude]), {
         text:                 this.text,
         fontSize:             this.fontSize,
         fontWeight:           this.fontWeight,
@@ -973,7 +973,7 @@
      * @chainable
      */
     _set: function(key, value) {
-      this.callSuper('_set', key, value);
+      this.constructor.superclass.prototype._set.apply(this, [key, value]);
 
       if (key in this._dimensionAffectingProps) {
         this._initDimensions();

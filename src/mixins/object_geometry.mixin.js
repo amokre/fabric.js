@@ -92,11 +92,17 @@
      * @return {Boolean} true if point is inside the object
      */
     containsPoint: function(point) {
-      var lines = this._getImageLines(this.oCoords),
-          xPoints = this._findCrossPoints(point, lines);
+	  // (atWar) Added check for this.oCoords
+	  // this.oCoords can sometimes be null. Looks like it's a bug?
+	  if (this.oCoords) {
+		  var lines = this._getImageLines(this.oCoords),
+			  xPoints = this._findCrossPoints(point, lines);
 
-      // if xPoints is odd then point is inside the object
-      return (xPoints !== 0 && xPoints % 2 === 1);
+		  // if xPoints is odd then point is inside the object
+		  return (xPoints !== 0 && xPoints % 2 === 1);
+	  } else {
+		  return false;
+	  }
     },
 
     /**
@@ -302,14 +308,10 @@
      * @return {fabric.Object} thisArg
      * @chainable
      */
-    setCoords: function() {
-      var theta = degreesToRadians(this.angle),
-          vpt = this.getViewportTransform(),
-          f = function (p) {
-            return fabric.util.transformPoint(p, vpt);
-          },
-          p = this._calculateCurrentDimensions(false),
-          currentWidth = p.x, currentHeight = p.y;
+    setCoords: function() { // (atWar) Simplified setCoords function (won't work when using angles and new viewport stuff (pan & zoom?))
+      var p = this._calculateCurrentDimensions(false),
+          currentWidth = p.x, 
+		  currentHeight = p.y;
 
       // If width is negative, make postive. Fixes path selection issue
       if (currentWidth < 0) {
@@ -326,37 +328,19 @@
               : 0),
 
           // offset added for rotate and scale actions
-          offsetX = Math.cos(_angle + theta) * _hypotenuse,
-          offsetY = Math.sin(_angle + theta) * _hypotenuse,
-          sinTh = Math.sin(theta),
-          cosTh = Math.cos(theta),
+          offsetX = Math.cos(_angle) * _hypotenuse,
+          offsetY = Math.sin(_angle) * _hypotenuse,
           coords = this.getCenterPoint(),
           wh = new fabric.Point(currentWidth, currentHeight),
-          _tl =   new fabric.Point(coords.x - offsetX, coords.y - offsetY),
-          _tr =   new fabric.Point(_tl.x + (wh.x * cosTh),   _tl.y + (wh.x * sinTh)),
-          bl =  f(new fabric.Point(_tl.x - (wh.y * sinTh),   _tl.y + (wh.y * cosTh))),
-          br  = f(new fabric.Point(_tr.x - (wh.y * sinTh),   _tr.y + (wh.y * cosTh))),
-          tl  = f(_tl),
-          tr  = f(_tr),
+          tl =   new fabric.Point(coords.x - offsetX, coords.y - offsetY),
+          tr =   new fabric.Point(tl.x + wh.x,   tl.y),
+          bl =  new fabric.Point(tl.x,   tl.y + wh.y),
+          br  = new fabric.Point(tr.x,   tr.y + wh.y),
           ml  = new fabric.Point((tl.x + bl.x)/2, (tl.y + bl.y)/2),
           mt  = new fabric.Point((tr.x + tl.x)/2, (tr.y + tl.y)/2),
           mr  = new fabric.Point((br.x + tr.x)/2, (br.y + tr.y)/2),
           mb  = new fabric.Point((br.x + bl.x)/2, (br.y + bl.y)/2),
-          mtr = new fabric.Point(mt.x + sinTh * this.rotatingPointOffset, mt.y - cosTh * this.rotatingPointOffset);
-      // debugging
-
-      /* setTimeout(function() {
-         canvas.contextTop.fillStyle = 'green';
-         canvas.contextTop.fillRect(mb.x, mb.y, 3, 3);
-         canvas.contextTop.fillRect(bl.x, bl.y, 3, 3);
-         canvas.contextTop.fillRect(br.x, br.y, 3, 3);
-         canvas.contextTop.fillRect(tl.x, tl.y, 3, 3);
-         canvas.contextTop.fillRect(tr.x, tr.y, 3, 3);
-         canvas.contextTop.fillRect(ml.x, ml.y, 3, 3);
-         canvas.contextTop.fillRect(mr.x, mr.y, 3, 3);
-         canvas.contextTop.fillRect(mt.x, mt.y, 3, 3);
-         canvas.contextTop.fillRect(mtr.x, mtr.y, 3, 3);
-       }, 50); */
+          mtr = new fabric.Point(mt.x, mt.y - this.rotatingPointOffset);
 
       this.oCoords = {
         // corners
@@ -366,9 +350,6 @@
         // rotating point
         mtr: mtr
       };
-
-      // set coordinates of the draggable boxes in the corners used to scale/rotate the image
-      this._setCornerCoords && this._setCornerCoords();
 
       return this;
     },

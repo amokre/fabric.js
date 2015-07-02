@@ -63,7 +63,7 @@
      * @return {Object} Object representation of an instance
      */
     toObject: function() {
-      return extend(this.callSuper('toObject'), {
+      return extend(this.constructor.superclass.prototype.toObject.apply(this), {
         brightness: this.brightness
       });
     }

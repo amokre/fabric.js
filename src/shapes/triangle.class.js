@@ -33,7 +33,7 @@
     initialize: function(options) {
       options = options || { };
 
-      this.callSuper('initialize', options);
+      this.constructor.superclass.prototype.initialize.apply(this, [options]);
 
       this.set('width', options.width || 100)
           .set('height', options.height || 100);

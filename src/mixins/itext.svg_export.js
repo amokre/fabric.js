@@ -10,8 +10,8 @@
      */
     _setSVGTextLineText: function(lineIndex, textSpans, height, textLeftOffset, textTopOffset, textBgRects) {
       if (!this.styles[lineIndex]) {
-        this.callSuper('_setSVGTextLineText',
-          lineIndex, textSpans, height, textLeftOffset, textTopOffset);
+        this.constructor.superclass.prototype._setSVGTextLineText.apply(this,
+          [lineIndex, textSpans, height, textLeftOffset, textTopOffset]);
       }
       else {
         this._setSVGTextLineChars(
