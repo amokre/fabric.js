@@ -276,7 +276,7 @@
      */
     getNumNewLinesInSelectedText: function() {
       var selectedText = this.getSelectedText(),
-          numNewLines = 0;
+          numNewLines  = 0;
 
       for (var i = 0, len = selectedText.length; i < len; i++) {
         if (selectedText[i] === '\n') {
@@ -289,12 +289,12 @@
     /**
      * Finds index corresponding to beginning or end of a word
      * @param {Number} selectionStart Index of a character
-     * @param {Number} direction: 1 or -1
+     * @param {Number} direction 1 or -1
      * @return {Number} Index of the beginning or end of a word
      */
     searchWordBoundary: function(selectionStart, direction) {
-      var index = this._reSpace.test(this.text.charAt(selectionStart)) ? selectionStart - 1 : selectionStart,
-          _char = this.text.charAt(index),
+      var index     = this._reSpace.test(this.text.charAt(selectionStart)) ? selectionStart - 1 : selectionStart,
+          _char     = this.text.charAt(index),
           reNonWord = /[ \n\.,;!\?\-]/;
 
       while (!reNonWord.test(_char) && index > 0 && index < this.text.length) {
@@ -313,7 +313,8 @@
      */
     selectWord: function(selectionStart) {
       var newSelectionStart = this.searchWordBoundary(selectionStart, -1), /* search backwards */
-          newSelectionEnd = this.searchWordBoundary(selectionStart, 1); /* search forward */
+          newSelectionEnd   = this.searchWordBoundary(selectionStart, 1);
+      /* search forward */
 
       this.setSelectionStart(newSelectionStart);
       this.setSelectionEnd(newSelectionEnd);
@@ -325,7 +326,7 @@
      */
     selectLine: function(selectionStart) {
       var newSelectionStart = this.findLineBoundaryLeft(selectionStart),
-          newSelectionEnd = this.findLineBoundaryRight(selectionStart);
+          newSelectionEnd   = this.findLineBoundaryRight(selectionStart);
 
       this.setSelectionStart(newSelectionStart);
       this.setSelectionEnd(newSelectionEnd);
@@ -382,7 +383,7 @@
      */
     initMouseMoveHandler: function() {
       var _this = this;
-      this.canvas.on('mouse:move',  function(options) {
+      this.canvas.on('mouse:move', function(options) {
         if (!_this.__isMousedown || !_this.isEditing) {
           return;
         }
@@ -512,32 +513,53 @@
 
     _removeSingleCharAndStyle: function(index) {
       var isBeginningOfLine = this.text[index - 1] === '\n',
-          indexStyle = isBeginningOfLine ? index : index - 1;
+          indexStyle        = isBeginningOfLine ? index : index - 1;
       this.removeStyleObject(isBeginningOfLine, indexStyle);
       this.text = this.text.slice(0, index - 1) +
-                  this.text.slice(index);
+        this.text.slice(index);
 
-      this._textLines = this.text.split(this._reNewline);
+      this._textLines = this._splitTextIntoLines();
     },
 
     /**
-     * Inserts a character where cursor is (replacing selection if one exists)
+     * Inserts characters where cursor is (replacing selection if one exists)
      * @param {String} _chars Characters to insert
+     * @param {Boolean} useCopiedStyle use fabric.copiedTextStyle
      */
     insertChars: function(_chars, useCopiedStyle) {
+      var style;
+
       if (this.selectionEnd - this.selectionStart > 1) {
         this._removeCharsFromTo(this.selectionStart, this.selectionEnd);
         this.setSelectionEnd(this.selectionStart);
       }
+
+      for (var i = 0, len = _chars.length; i < len; i++) {
+        if (useCopiedStyle) {
+          style = fabric.copiedTextStyle[i];
+        }
+        this.insertChar(_chars[i], i < len - 1, style);
+      }
+    },
+
+    /**
+     * Inserts a character where cursor is
+     * @param {String} _char Characters to insert
+     * @param {Boolean} skipUpdate trigger rendering and updates at the end of text insert
+     * @param {Object} styleObject Style to be inserted for the new char
+     */
+    insertChar: function(_char, skipUpdate, styleObject) {
       var isEndOfLine = this.text[this.selectionStart] === '\n';
       this.text = this.text.slice(0, this.selectionStart) +
-                  _chars + this.text.slice(this.selectionEnd);
-      this.insertStyleObjects(_chars, isEndOfLine, useCopiedStyle);
-      this.setSelectionStart(this.selectionStart + _chars.length);
+        _char + this.text.slice(this.selectionEnd);
+      this._textLines = this._splitTextIntoLines();
+      this.insertStyleObjects(_char, isEndOfLine, styleObject);
+      this.setSelectionStart(this.selectionStart + 1);
       this.setSelectionEnd(this.selectionStart);
-
+      if (skipUpdate) {
+        return;
+      }
       this.canvas && this.canvas.renderAll();
-
       this.setCoords();
       this.fire('changed');
       this.canvas && this.canvas.fire('text:changed', { target: this });
@@ -554,11 +576,11 @@
       this.shiftLineStyles(lineIndex, +1);
 
       if (!this.styles[lineIndex + 1]) {
-        this.styles[lineIndex + 1] = { };
+        this.styles[lineIndex + 1] = {};
       }
 
-      var currentCharStyle = { },
-          newLineStyles = { };
+      var currentCharStyle = {},
+          newLineStyles    = {};
 
       if (this.styles[lineIndex] && this.styles[lineIndex][charIndex - 1]) {
         currentCharStyle = this.styles[lineIndex][charIndex - 1];
@@ -593,7 +615,7 @@
      */
     insertCharStyleObject: function(lineIndex, charIndex, style) {
 
-      var currentLineStyles = this.styles[lineIndex],
+      var currentLineStyles       = this.styles[lineIndex],
           currentLineStylesCloned = clone(currentLineStyles);
 
       if (charIndex === 0 && !style) {
@@ -604,9 +626,14 @@
       // 0,1,2,3 -> (charIndex=2) -> 0,1,3,4 -> (insert 2) -> 0,1,2,3,4
       for (var index in currentLineStylesCloned) {
         var numericIndex = parseInt(index, 10);
+
         if (numericIndex >= charIndex) {
           currentLineStyles[numericIndex + 1] = currentLineStylesCloned[numericIndex];
-          //delete currentLineStyles[index];
+
+          // only delete the style if there was nothing moved there
+          if (!currentLineStylesCloned[numericIndex - 1]) {
+            delete currentLineStyles[numericIndex];
+          }
         }
       }
 
@@ -619,44 +646,24 @@
      * Inserts style object(s)
      * @param {String} _chars Characters at the location where style is inserted
      * @param {Boolean} isEndOfLine True if it's end of line
-     * @param {Boolean} [useCopiedStyle] Style to insert
+     * @param {Object} [styleObject] Style to insert
      */
-    insertStyleObjects: function(_chars, isEndOfLine, useCopiedStyle) {
+    insertStyleObjects: function(_chars, isEndOfLine, styleObject) {
       // removed shortcircuit over isEmptyStyles
 
       var cursorLocation = this.get2DCursorLocation(),
-          lineIndex = cursorLocation.lineIndex,
-          charIndex = cursorLocation.charIndex;
+          lineIndex      = cursorLocation.lineIndex,
+          charIndex      = cursorLocation.charIndex;
 
-      if (!this.styles[lineIndex]) {
-        this.styles[lineIndex] = { };
+      if (!this._getLineStyle(lineIndex)) {
+        this._setLineStyle(lineIndex, {});
       }
 
       if (_chars === '\n') {
         this.insertNewlineStyleObject(lineIndex, charIndex, isEndOfLine);
       }
       else {
-        if (useCopiedStyle) {
-          this._insertStyles(this.copiedStyles);
-        }
-        else {
-          // TODO: support multiple style insertion if _chars.length > 1
-          this.insertCharStyleObject(lineIndex, charIndex);
-        }
-      }
-    },
-
-    /**
-     * @private
-     */
-    _insertStyles: function(styles) {
-      for (var i = 0, len = styles.length; i < len; i++) {
-
-        var cursorLocation = this.get2DCursorLocation(this.selectionStart + i),
-            lineIndex = cursorLocation.lineIndex,
-            charIndex = cursorLocation.charIndex;
-
-        this.insertCharStyleObject(lineIndex, charIndex, styles[i]);
+        this.insertCharStyleObject(lineIndex, charIndex, styleObject);
       }
     },
 
@@ -688,18 +695,18 @@
     removeStyleObject: function(isBeginningOfLine, index) {
 
       var cursorLocation = this.get2DCursorLocation(index),
-          lineIndex = cursorLocation.lineIndex,
-          charIndex = cursorLocation.charIndex;
+          lineIndex      = cursorLocation.lineIndex,
+          charIndex      = cursorLocation.charIndex;
 
       if (isBeginningOfLine) {
 
-        var textOnPreviousLine = this._textLines[lineIndex - 1],
+        var textOnPreviousLine     = this._textLines[lineIndex - 1],
             newCharIndexOnPrevLine = textOnPreviousLine
               ? textOnPreviousLine.length
               : 0;
 
         if (!this.styles[lineIndex - 1]) {
-          this.styles[lineIndex - 1] = { };
+          this.styles[lineIndex - 1] = {};
         }
 
         for (charIndex in this.styles[lineIndex]) {
